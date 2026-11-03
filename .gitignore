@@ -1,0 +1,5 @@
+.env
+.venv/
+__pycache__/
+resultados_experimento.csv
+trazas.csv
