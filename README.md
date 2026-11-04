@@ -48,7 +48,7 @@ flowchart LR
 - **Specialist Analysts**: Run concurrently using `asyncio.gather` with specialized prompts and domain-specific tools.
 - **Legal Rapporteur**: Synthesizes cross-domain findings into a reasoned legal opinion.
 - **Forensic Critic (Evaluator-Optimizer)**: Evaluates the draft verdict against a strict rubric (score 1 to 5). If unsupported assertions or contradictions are detected, it issues structured feedback for refinement.
-- **Model Assigned**: Uniform deployment of `deepseek/deepseek-v4.1-flash` across all agents.
+- **Model Assigned**: Uniform deployment of `gemini-3.5-flash-lite` (Google AI Studio Free-Tier) across all agents ($0.0375 / $0.150 USD per million tokens).
 
 ```mermaid
 flowchart TD
@@ -70,8 +70,8 @@ flowchart TD
 
 ### Topology C: Multi-Agent Mixed (Model Tiering)
 Identical architecture to Topology B, but implementing a tiered model distribution strategy:
-- Specialist Analysts and Rapporteur: Economical model `deepseek/deepseek-v4.1-flash` ($0.028 / $0.12 USD per million tokens).
-- Orchestrator and Critic: High-capacity reasoning model `google/gemini-3.7-flash` ($0.75 / $3.75 USD per million tokens).
+- Specialist Analysts and Rapporteur: Economical model `gemini-3.5-flash-lite` ($0.0375 / $0.150 USD per million tokens).
+- Orchestrator and Critic: Higher-reasoning model `gemini-3.5-flash` ($0.075 / $0.300 USD per million tokens).
 
 ### Topology D: Dynamic Router (Adaptive Triage)
 A lightweight classifier examines the input query:
@@ -95,51 +95,54 @@ flowchart TD
 
 ## 3. Quantitative Results Matrix
 
-Empirical evaluation executed across the calibrated 10-case forensic benchmark (`BENCHMARK_DATASET`):
+Empirical evaluation executed across the calibrated 10-case forensic benchmark (`BENCHMARK_DATASET`) utilizing live Google Gemini Free-Tier endpoints (`gemini-3.5-flash-lite` and `gemini-3.5-flash`):
 
 | Configuration | Mean Quality (0-1) | Mean Cost (USD) | Total Cost (USD) | Mean Latency (s) | Latency p50 (s) | Latency p95 (s) | Success Rate (%) | Calls / Task | Coordination Cost (%) | Duplicate Queries (%) |
 |---|---|---|---|---|---|---|---|---|---|---|
-| **A · Single-Agent (Baseline)** | 0.730 | $0.000055 | $0.00055 | 1.743 | 1.375 | 3.564 | 100.0% | 2.0 | 0.0% | 25.0% |
-| **B · Multi-Agent Uniform** | **0.982** | $0.000456 | $0.00456 | 6.935 | 5.436 | 13.202 | 100.0% | 9.0 | 35.7% | 44.2% |
-| **C · Multi-Agent Mixed (Tiered)** | **0.982** | $0.001715 | $0.01715 | 4.810 | 4.260 | 7.217 | 100.0% | 9.0 | 82.9% | 44.2% |
-| **D · Dynamic Router** | 0.822 | $0.000276 | $0.00276 | 6.404 | 5.704 | 14.757 | 100.0% | 6.5 | 36.0% | 28.6% |
+| **A · Single-Agent (Baseline)** | 0.730 | $0.000057 | $0.00057 | 1.868 | 1.779 | 2.596 | 100.0% | 1.9 | 0.0% | 30.3% |
+| **B · Multi-Agent Uniform** | 0.954 | $0.000197 | $0.00197 | 5.648 | 5.860 | 7.794 | 100.0% | 7.0 | 35.8% | 36.4% |
+| **C · Multi-Agent Mixed (Tiered)** | **0.965** | $0.000237 | $0.00237 | 11.485 | 11.012 | 17.837 | 100.0% | 6.6 | 37.6% | 36.3% |
+| **D · Dynamic Router** | 0.794 | $0.000133 | $0.00133 | 5.410 | 5.005 | 9.171 | 100.0% | 5.6 | 34.9% | 24.0% |
 
 ---
 
 ## 4. Evaluation of the Five Core Dimensions (PPT_Multiagente.pdf Slide 4)
 
 1. **Quality**:
-   - The Single-Agent Baseline scored 0.730, consistently missing fiscal debarment entries associated with consortium minority partners and skipping technical ISO requirements.
-   - Multi-Agent Topologies B and C reached 0.982, demonstrating the superiority of clean context windows, domain specialization, and adversarial critique.
+   - The Single-Agent Baseline scored 0.730, struggling on multi-party consortia where fiscal disqualifications are embedded in minority partners.
+   - Multi-Agent Uniform reached 0.954, validating the role-specialized context isolation.
+   - Multi-Agent Mixed reached **0.965**, demonstrating that dedicating a stronger reasoning model (`gemini-3.5-flash`) to the adversarial Forensic Critic reliably identifies subtle non-compliance clauses.
 2. **Cost**:
    - Calculated with precision using token tracking: `Cost = (tokens_in * price_in + tokens_out * price_out) / 1e6`.
-   - Topology B increases cost from $0.055 mUSD to $0.456 mUSD per case. This investment is justified in legal forensics where a single missed debarment carries fiscal liability.
-   - Topology C raises cost by nearly 3.8x ($1.715 mUSD) with no corresponding quality gain on this benchmark, indicating model tiering must be applied selectively.
+   - The Single-Agent baseline averaged $0.057 mUSD per case.
+   - Topology B increased mean cost to $0.197 mUSD per case, an accessible investment under Google AI Studio free tier for high-reliability forensic validation.
+   - Topology C cost was $0.237 mUSD per case, only 20% higher than Topology B while capturing the peak quality score.
 3. **Latency**:
-   - Single-Agent latency is minimal (1.743 s mean, 1.375 s p50).
-   - Multi-Agent Uniform averages 6.935 s (p50: 5.436 s). Concurrency softens the critical path by running three domain branches simultaneously.
-   - Dynamic Router achieves 6.404 s mean on mixed query workloads.
+   - Single-Agent latency remained the lowest (1.868 s mean, 1.779 s p50).
+   - Multi-Agent Uniform achieved a fast 5.648 s mean (5.860 s p50), aided by `asyncio.gather` parallel specialist execution.
+   - Multi-Agent Mixed recorded 11.485 s mean due to sequential reflection and critique rounds.
+   - Dynamic Router achieved 5.410 s mean with 24.0% duplicate queries.
 4. **Robustness**:
    - 100% operational success rate across all evaluated configurations.
    - Active protection against cost runaway via deterministic budget enforcement (`BudgetExceededException`).
    - In negative controls (e.g., nonexistent tender LP-999-2026), agents abstained cleanly with "Information unavailable", completely avoiding hallucinations.
 5. **Coordination**:
-   - In Topology B, 35.7% of total cost represents orchestration and critique overhead.
-   - In Topology C, coordination overhead escalates to 82.9% due to premium pricing on the Orchestrator and Critic.
-   - Duplicate queries averaged 44.2% across specialists because multiple analysts inspect the common tender sheet.
+   - In Topology B, 35.8% of total cost represents orchestration and critique overhead.
+   - In Topology C, coordination overhead was 37.6%, reflecting balanced tiering without runaway expenditure.
+   - Duplicate queries ranged between 24.0% (Router) and 36.4% (Uniform multi-agent).
 
 ---
 
 ## 5. Pareto Frontier Analysis: Cost vs. Quality
 
-Mathematical dominance analysis across the 4 topologies reveals the following non-dominated set:
+Mathematical dominance analysis across the 4 topologies reveals that all configurations lie on the Pareto optimal curve:
 
-$$\text{Pareto Frontier} = \{ \text{A · Single-Agent}, \text{D · Dynamic Router}, \text{B · Multi-Agent Uniform} \}$$
+$$\text{Pareto Frontier} = \{ \text{A · Single-Agent}, \text{D · Dynamic Router}, \text{B · Multi-Agent Uniform}, \text{C · Multi-Agent Mixed} \}$$
 
 - **Configuration A (Single-Agent)**: The Pareto choice when latency and token cost are absolute constraints, and a preliminary screening suffices.
-- **Configuration D (Dynamic Router)**: The practical sweet spot for interactive systems processing mixed simple and complex workloads.
-- **Configuration B (Multi-Agent Uniform)**: The mandatory choice for high-stakes forensic audits where quality is non-negotiable.
-- **Configuration C (Multi-Agent Mixed)**: Mathematically **dominated**, producing identical quality to B at 3.6x higher cost.
+- **Configuration D (Dynamic Router)**: The triage sweet spot for interactive systems processing mixed simple and complex workloads.
+- **Configuration B (Multi-Agent Uniform)**: The high-throughput multi-agent choice balancing rapid turnaround (5.65 s) with strong quality (0.954).
+- **Configuration C (Multi-Agent Mixed)**: The non-dominated peak accuracy configuration (0.965) for critical legal forensics where false negatives carry severe statutory liability.
 
 ---
 
