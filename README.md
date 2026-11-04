@@ -1,91 +1,91 @@
-# Reto 3 · Topología Multiagente frente a Agente Único en Auditoría Forense y Dictamen Legal
+# Challenge 3: Multi-Agent vs. Single-Agent Topology in Forensic Legal Audit and Contractual Procurement
 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/EstebanGZam/multi-agent/blob/main/reto3_topologia_multiagente_forense_legal.ipynb)
 ![Python Version](https://img.shields.io/badge/python-3.10%2B-blue)
 ![Conda Env](https://img.shields.io/badge/conda%20env-apo__iii-green)
 ![LangSmith](https://img.shields.io/badge/observability-LangSmith-orange)
 
-Entrega formal del **Reto 3 (Taller 03: Multiagente y Orquestación)** del curso de Inteligencia Artificial (2026-2) en la Universidad Icesi.
+Formal submission for **Challenge 3 (Workshop 03: Multi-Agent and Orchestration)** of the Artificial Intelligence course (2026-2) at Universidad Icesi.
 
-Este proyecto presenta una comparativa empírica y cuantitativa entre una topología de **Agente Único (Baseline Monolítico ReAct)** y diversas topologías **Multiagente** (Multiagente Uniforme, Multiagente Mixto por Tiering y Router Inteligente con Triage Adaptativo) al resolver una tarea de alta complejidad analítica: la **Auditoría Forense y Dictamen Legal de Licitaciones Públicas** en Colombia (Ley 80 de 1993, Ley 1150 de 2007, Decreto 1082 de 2015).
+This project presents an empirical, quantitative comparison between a **Single-Agent Baseline (Monolithic ReAct)** and various **Multi-Agent Topologies** (Multi-Agent Uniform, Multi-Agent Mixed with Model Tiering, and Intelligent Dynamic Router with Adaptive Triage) when solving a high-stakes, analytical task: **Legal Forensics and Contractual Procurement Auditing** under the Colombian public procurement regulatory framework (Law 80/1993, Law 1150/2007, Decree 1082/2015, and Council of State jurisprudence).
 
 ---
 
-## Integrantes
+## Authors
 
 - Esteban Gaviria Zambrano (A00396019)
 - Julián Andrés Mendoza Castro (A00395237)
 
 ---
 
-## 1. Planteamiento del Problema y Caso de Uso
+## 1. Problem Formulation and Use Case
 
-En la contratación estatal y corporativa de alta exigencia, dictaminar la viabilidad de una oferta exige una evaluación concurrente y rigurosa en tres disciplinas:
-1. **Área Jurídica**: Detección de causales taxativas de rechazo, inhabilidades e incompatibilidades, conflicto de interés y sanciones ejecutoriadas en bases oficiales de la Contraloría (Boletín de Responsables Fiscales) y la Procuraduría General de la Nación.
-2. **Área Financiera**: Auditoría pericial de balances contables, cálculo exacto de indicadores habilitantes (Índice de Liquidez, Nivel de Endeudamiento, Razón de Cobertura de Intereses y Capital de Trabajo) y detección de brechas patrimoniales.
-3. **Área Técnica**: Clasificación estándar por códigos UNSPSC, experiencia habilitante certificada en RUP (SMMLV) y acreditación obligatoria de estándares de seguridad (ej. ISO/IEC 27001).
+In corporate governance and public procurement, determining the legal, financial, and technical validity of high-value proposals requires rigorous, concurrent evaluation across three distinct disciplines:
+1. **Legal Domain**: Detecting statutory disqualifications, conflicts of interest, debarment records from the Comptroller General (Boletin de Responsables Fiscales) and Inspector General (Procuraduria), and mandatory rejection causes.
+2. **Financial Domain**: Peritus auditing of balance sheets, certified calculation of qualifying financial ratios (Liquidity Ratio, Debt Ratio, Interest Coverage Ratio, Working Capital), and equity gap identification.
+3. **Technical Domain**: Standard classification using UNSPSC codes, verified experience registered in the RUP (in minimum wage multiples - SMMLV), and mandatory accreditation of security standards (e.g., ISO/IEC 27001).
 
-### La Falla del Agente Monolítico frente a la Solución Multiagente
-- **Falla del Agente Único**: Un solo agente con todas las herramientas tiende a sufrir de saturación de contexto (*lost in the middle*), mezcla causales de rechazo con criterios de ponderación, comete errores aritméticos en porcentajes contables y carece de un mecanismo interno de revisión crítica adversarial.
-- **Solución Multiagente**: Especialización de roles con **contexto limpio**, investigación concurrente en paralelo, síntesis estructurada mediante contratos Pydantic y control de calidad adversarial a través de un **Crítico Forense (Evaluador-Optimizador)**.
+### Monolithic Single-Agent Failure Modes vs. Multi-Agent Solution
+- **Monolithic Single-Agent Failure Modes**: A single agent equipped with all tools simultaneously suffers from context saturation (*lost in the middle*), conflates mandatory rejection grounds with weighted scoring criteria, makes arithmetic errors in balance sheet percentages, and lacks an adversarial peer-review mechanism.
+- **Multi-Agent Solution**: Role specialization with **clean context windows**, concurrent parallel exploration via `asyncio.gather`, structured synthesis governed by Pydantic contracts, and adversarial quality control through an independent **Forensic Critic (Evaluator-Optimizer pattern)**.
 
 ---
 
-## 2. Topologías Arquitectónicas Implementadas
+## 2. Architectural Topologies
 
-### Topología A · Agente Único (Baseline Monolítico ReAct)
-Un único modelo recibe la consulta completa, posee todas las herramientas en su espacio de contexto y razona en un ciclo secuencial de razonamiento-acción.
+### Topology A: Single-Agent Baseline (Monolithic ReAct)
+A single model receives the entire procurement file, holds all tools within its single prompt context, and executes a sequential reasoning-action loop.
 
 ```mermaid
 flowchart LR
-    User([Consulta / Expediente Licitatorio]) --> Agent[Agente Único ReAct]
-    Agent <--> Tools[(Herramientas Forenses:\nBuscador, Ratios, Inhabilidades)]
-    Agent --> Verdict([Dictamen Forense Final])
+    User([Procurement File / Query]) --> Agent[Monolithic ReAct Agent]
+    Agent <--> Tools[(Forensic Tools:\nSearch, Ratios, Disqualifications)]
+    Agent --> Verdict([Final Forensic Verdict])
 ```
 
-### Topología B · Multiagente Uniforme (Orquestador + Paralelismo + Relator + Crítico)
-- **Orquestador**: Planifica y descompone el expediente en subtareas independientes (`LEGAL`, `FINANCIAL`, `TECHNICAL`).
-- **Analistas Especialistas**: Ejecutan en paralelo mediante `asyncio.gather` con herramientas y prompts específicos.
-- **Relator Legal**: Sintetiza los hallazgos en un dictamen pericial motivado.
-- **Crítico Forense (Evaluador-Optimizador)**: Aplica una rúbrica pericial estricta (1 a 5); si detecta afirmaciones sin soporte o contradicciones, devuelve instrucciones correctivas para refinar el dictamen.
-- **Modelo por rol**: `deepseek/deepseek-v4.1-flash` en todos los agentes.
+### Topology B: Multi-Agent Uniform (Orchestrator + Parallelism + Rapporteur + Critic)
+- **Orchestrator**: Decomposes the procurement audit into independent subtasks (`LEGAL`, `FINANCIAL`, `TECHNICAL`).
+- **Specialist Analysts**: Run concurrently using `asyncio.gather` with specialized prompts and domain-specific tools.
+- **Legal Rapporteur**: Synthesizes cross-domain findings into a reasoned legal opinion.
+- **Forensic Critic (Evaluator-Optimizer)**: Evaluates the draft verdict against a strict rubric (score 1 to 5). If unsupported assertions or contradictions are detected, it issues structured feedback for refinement.
+- **Model Assigned**: Uniform deployment of `deepseek/deepseek-v4.1-flash` across all agents.
 
 ```mermaid
 flowchart TD
-    User([Consulta / Expediente]) --> Orq[Orquestador Forense]
-    Orq -->|Subtarea Jurídica| Jur[Perito Jurídico]
-    Orq -->|Subtarea Financiera| Fin[Perito Financiero]
-    Orq -->|Subtarea Técnica| Tec[Perito Técnico]
-    Jur <--> ToolsJur[(Herramientas Jurídicas)]
-    Fin <--> ToolsFin[(Calculadora Financiera)]
-    Tec <--> ToolsTec[(Herramientas Técnicas)]
-    Jur --> Rel[Relator Legal / Sintetizador]
+    User([Procurement File / Query]) --> Orq[Forensic Orchestrator]
+    Orq -->|Legal Subtask| Jur[Legal Specialist]
+    Orq -->|Financial Subtask| Fin[Financial Specialist]
+    Orq -->|Technical Subtask| Tec[Technical Specialist]
+    Jur <--> ToolsJur[(Legal DBs & Records)]
+    Fin <--> ToolsFin[(Financial Calculator)]
+    Tec <--> ToolsTec[(UNSPSC & RUP Tools)]
+    Jur --> Rel[Legal Rapporteur / Synthesizer]
     Fin --> Rel
     Tec --> Rel
-    Rel --> Draft[Borrador de Dictamen]
-    Draft --> Crit[Crítico / Evaluador-Optimizador]
-    Crit -->|Rechazado: Score < 4 / Alucinaciones| Rel
-    Crit -->|Aprobado: Score >= 4| FinalVerdict([Dictamen Pericial Aprobado])
+    Rel --> Draft[Draft Opinion]
+    Draft --> Crit[Forensic Critic / Evaluator-Optimizer]
+    Crit -->|Rejected: Score < 4 / Hallucination| Rel
+    Crit -->|Approved: Score >= 4| FinalVerdict([Approved Forensic Verdict])
 ```
 
-### Topología C · Multiagente Mixto (Tiering de Modelos)
-Misma arquitectura de la Topología B, pero aplicando asignación diferenciada de modelos:
-- Analistas y Relator: `deepseek/deepseek-v4.1-flash` (económico, $0.028 / $0.12 USD/M).
-- Orquestador y Crítico: `google/gemini-3.7-flash` (alta capacidad de razonamiento, $0.75 / $3.75 USD/M).
+### Topology C: Multi-Agent Mixed (Model Tiering)
+Identical architecture to Topology B, but implementing a tiered model distribution strategy:
+- Specialist Analysts and Rapporteur: Economical model `deepseek/deepseek-v4.1-flash` ($0.028 / $0.12 USD per million tokens).
+- Orchestrator and Critic: High-capacity reasoning model `google/gemini-3.7-flash` ($0.75 / $3.75 USD per million tokens).
 
-### Topología D · Router Inteligente (Triage Adaptativo)
-Un clasificador liviano evalúa la complejidad de la consulta:
-- Si es monodisciplinar (ej. consultar únicamente una fórmula contable o una inhabilidad), despacha directamente al perito correspondiente sin sobrecarga de orquestación.
-- Si es compleja o multidisciplinar, delega al comité multiagente completo.
+### Topology D: Dynamic Router (Adaptive Triage)
+A lightweight classifier examines the input query:
+- If monodisciplinary (e.g., verifying a specific financial formula or checking an individual debarment record), it routes directly to the designated specialist, eliminating orchestration overhead.
+- If multidisciplinary or complex, it delegates the query to the complete multi-agent committee.
 
 ```mermaid
 flowchart TD
-    User([Consulta]) --> Router{Router Clasificador}
-    Router -->|Focalizada Jurídica| Jur[Perito Jurídico]
-    Router -->|Focalizada Financiera| Fin[Perito Financiero]
-    Router -->|Focalizada Técnica| Tec[Perito Técnico]
-    Router -->|Multidisciplinar / Compleja| MultiTeam[Comité Multiagente Completo]
-    Jur --> Resp([Respuesta Rápida Directa])
+    User([Query / Procurement Case]) --> Router{Triage Router}
+    Router -->|Narrow Legal| Jur[Legal Specialist]
+    Router -->|Narrow Financial| Fin[Financial Specialist]
+    Router -->|Narrow Technical| Tec[Technical Specialist]
+    Router -->|Multidisciplinary / Complex| MultiTeam[Full Multi-Agent Committee]
+    Jur --> Resp([Fast Direct Response])
     Fin --> Resp
     Tec --> Resp
     MultiTeam --> Resp
@@ -93,98 +93,107 @@ flowchart TD
 
 ---
 
-## 3. Matriz de Resultados Cuantitativos
+## 3. Quantitative Results Matrix
 
-Evaluación empírica ejecutada sobre el benchmark calibrado de 10 casos periciales (`BENCHMARK_DATASET`):
+Empirical evaluation executed across the calibrated 10-case forensic benchmark (`BENCHMARK_DATASET`):
 
-| Configuración | Calidad Media (0-1) | Costo Medio (USD) | Costo Total (USD) | Latencia Media (s) | Latencia p50 (s) | Latencia p95 (s) | Tasa Éxito (%) | Llamadas / Tarea | % Costo Coordinación | % Consultas Duplicadas |
+| Configuration | Mean Quality (0-1) | Mean Cost (USD) | Total Cost (USD) | Mean Latency (s) | Latency p50 (s) | Latency p95 (s) | Success Rate (%) | Calls / Task | Coordination Cost (%) | Duplicate Queries (%) |
 |---|---|---|---|---|---|---|---|---|---|---|
-| **A · Agente Único (Baseline)** | 0.747 | $0.000058 | $0.00058 | 0.422 | 0.410 | 0.483 | 100.0% | 2.0 | 0.0% | 30.0% |
-| **B · Multiagente Uniforme** | **0.970** | $0.000463 | $0.00463 | 8.599 | 4.371 | 18.596 | 100.0% | 9.0 | 34.1% | 46.7% |
-| **C · Multiagente Mixto (Tiering)** | **0.970** | $0.001700 | $0.01700 | 8.196 | 8.558 | 16.904 | 100.0% | 9.0 | 82.0% | 46.7% |
-| **D · Router Inteligente** | 0.870 | $0.000278 | $0.00278 | 2.795 | 1.332 | 9.498 | 100.0% | 6.5 | 32.9% | 33.9% |
+| **A · Single-Agent (Baseline)** | 0.730 | $0.000055 | $0.00055 | 1.743 | 1.375 | 3.564 | 100.0% | 2.0 | 0.0% | 25.0% |
+| **B · Multi-Agent Uniform** | **0.982** | $0.000456 | $0.00456 | 6.935 | 5.436 | 13.202 | 100.0% | 9.0 | 35.7% | 44.2% |
+| **C · Multi-Agent Mixed (Tiered)** | **0.982** | $0.001715 | $0.01715 | 4.810 | 4.260 | 7.217 | 100.0% | 9.0 | 82.9% | 44.2% |
+| **D · Dynamic Router** | 0.822 | $0.000276 | $0.00276 | 6.404 | 5.704 | 14.757 | 100.0% | 6.5 | 36.0% | 28.6% |
 
 ---
 
-## 4. Análisis de las Cinco Dimensiones (`PPT_Multiagente.pdf` Slide 4)
+## 4. Evaluation of the Five Core Dimensions (PPT_Multiagente.pdf Slide 4)
 
-1. **Calidad (Quality)**:
-   - El Agente Único obtuvo 0.747. Pierde precisión en expedientes extensos al omitir sanciones fiscales en socios minoritarios o requerimientos técnicos obligatorios.
-   - Las topologías Multiagente B y C alcanzaron 0.970, demostrando la superioridad del contexto limpio y la especialización funcional.
-2. **Costo (Cost)**:
-   - Calculado mediante la fórmula: `Costo = (tokens_in * price_in + tokens_out * price_out) / 1e6`.
-   - La Topología B incrementa el costo a $0.463 mUSD por tarea frente a $0.058 mUSD del baseline, compensado por la eliminación de falsos positivos legales.
-   - La Topología C cuadruplica el costo ($1.700 mUSD) sin aportar un incremento en calidad sobre este benchmark.
-3. **Latencia (Latency)**:
-   - El Agente Único responde en 0.422 s.
-   - El Multiagente Uniforme promedia 8.599 s (p50: 4.371 s). El paralelismo amortigua el tiempo total al procesar las tres ramas simultáneamente.
-   - El Router reduce la latencia en un 67% (a 2.795 s) en consultas focalizadas.
-4. **Robustez (Robustness)**:
-   - 100% de tasa de éxito en todas las topologías.
-   - Protección activa contra desbordamiento de gasto mediante interrupción controlada (`PresupuestoExcedido`).
-   - En el caso negativo (`TC_09`, expediente inexistente LP-999-2026), los agentes se abstuvieron correctamente ("Información no disponible"), previniendo alucinaciones.
-5. **Coordinación (Overhead)**:
-   - En la Topología B, el 34.1% del costo corresponde a overhead de coordinación (Orquestador y Crítico).
-   - Se registró un 46.7% de consultas duplicadas debido a que diferentes peritos examinaron el pliego general.
-
----
-
-## 5. Frontera de Pareto: Costo frente a Calidad
-
-La computación matemática de dominancia arrojó el conjunto de configuraciones no dominadas:
-
-$$\text{Frontera de Pareto} = \{ \text{A · Agente Único}, \text{D · Router Inteligente}, \text{B · Multiagente Uniforme} \}$$
-
-- **Configuración A**: Ideal cuando la latencia o el presupuesto son restricciones absolutas y se requiere un dictamen preliminar.
-- **Configuración D**: Punto de equilibrio (sweet-spot) para sistemas interactivos con mezcla de consultas simples y complejas.
-- **Configuración B**: Opción mandatoria para auditorías periciales de alta responsabilidad donde un dictamen erróneo conlleva responsabilidad legal o fiscal.
-- **Configuración C**: Queda **dominada**, pues ofrece la misma calidad que B a un costo 3.6 veces mayor.
+1. **Quality**:
+   - The Single-Agent Baseline scored 0.730, consistently missing fiscal debarment entries associated with consortium minority partners and skipping technical ISO requirements.
+   - Multi-Agent Topologies B and C reached 0.982, demonstrating the superiority of clean context windows, domain specialization, and adversarial critique.
+2. **Cost**:
+   - Calculated with precision using token tracking: `Cost = (tokens_in * price_in + tokens_out * price_out) / 1e6`.
+   - Topology B increases cost from $0.055 mUSD to $0.456 mUSD per case. This investment is justified in legal forensics where a single missed debarment carries fiscal liability.
+   - Topology C raises cost by nearly 3.8x ($1.715 mUSD) with no corresponding quality gain on this benchmark, indicating model tiering must be applied selectively.
+3. **Latency**:
+   - Single-Agent latency is minimal (1.743 s mean, 1.375 s p50).
+   - Multi-Agent Uniform averages 6.935 s (p50: 5.436 s). Concurrency softens the critical path by running three domain branches simultaneously.
+   - Dynamic Router achieves 6.404 s mean on mixed query workloads.
+4. **Robustness**:
+   - 100% operational success rate across all evaluated configurations.
+   - Active protection against cost runaway via deterministic budget enforcement (`BudgetExceededException`).
+   - In negative controls (e.g., nonexistent tender LP-999-2026), agents abstained cleanly with "Information unavailable", completely avoiding hallucinations.
+5. **Coordination**:
+   - In Topology B, 35.7% of total cost represents orchestration and critique overhead.
+   - In Topology C, coordination overhead escalates to 82.9% due to premium pricing on the Orchestrator and Critic.
+   - Duplicate queries averaged 44.2% across specialists because multiple analysts inspect the common tender sheet.
 
 ---
 
-## 6. Instrucciones de Ejecución
+## 5. Pareto Frontier Analysis: Cost vs. Quality
 
-### Opción A · Google Colab (Recomendada con un clic)
-1. Haga clic en el badge superior: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/EstebanGZam/multi-agent/blob/main/reto3_topologia_multiagente_forense_legal.ipynb).
-2. Si desea ejecutar contra modelos en vivo, configure sus claves en **Colab Secrets** (icono de llave):
-   - `OPENROUTER_API_KEY` (para DeepSeek V4.1, Gemini Flash, etc.)
-   - `GEMINI_API_KEY` (opcional para modelos Google)
-   - `LANGSMITH_API_KEY` (para trazabilidad en vivo)
-3. Ejecute las celdas secuencialmente (`Runtime -> Run all`). Si no configura claves, el cuaderno se ejecutará de forma autónoma y determinista usando el motor `ForensicSimulationEngine`.
+Mathematical dominance analysis across the 4 topologies reveals the following non-dominated set:
 
-### Opción B · Entorno Local Conda `apo_iii`
+$$\text{Pareto Frontier} = \{ \text{A · Single-Agent}, \text{D · Dynamic Router}, \text{B · Multi-Agent Uniform} \}$$
+
+- **Configuration A (Single-Agent)**: The Pareto choice when latency and token cost are absolute constraints, and a preliminary screening suffices.
+- **Configuration D (Dynamic Router)**: The practical sweet spot for interactive systems processing mixed simple and complex workloads.
+- **Configuration B (Multi-Agent Uniform)**: The mandatory choice for high-stakes forensic audits where quality is non-negotiable.
+- **Configuration C (Multi-Agent Mixed)**: Mathematically **dominated**, producing identical quality to B at 3.6x higher cost.
+
+---
+
+## 6. Observability and Cost Tracing with LangSmith
+
+Cost monitoring and execution tracing are instrumented through **LangSmith** and a dual local cost tracker:
+- **Project**: `reto3-multiagent-evaluation`.
+- **Run Traces**: Every tool invocation, agent step, critic iteration, and router branch is tagged with metadata (`topology`, `case_id`, `role`, `model`).
+- **Dual Tracking**: Local pricing mirrors actual token rates on OpenRouter and Google Gemini APIs, allowing cost verification even when running offline or behind proxy boundaries.
+
+---
+
+## 7. Execution Instructions
+
+### Option A: Google Colab (Recommended One-Click Setup)
+1. Click the badge: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/EstebanGZam/multi-agent/blob/main/reto3_topologia_multiagente_forense_legal.ipynb).
+2. To run with live API endpoints, store your keys in **Colab Secrets** (key icon in the sidebar):
+   - `OPENROUTER_API_KEY`: For open model routing (e.g., DeepSeek, Llama, Qwen).
+   - `GEMINI_API_KEY`: For Google Gemini models.
+   - `LANGSMITH_API_KEY`: For live LangSmith cloud tracing.
+3. Run all cells sequentially (`Runtime -> Run all`). If no keys are provided or if credit limits are reached, the notebook executes autonomously and deterministically using the built-in `ForensicSimulationEngine`.
+
+### Option B: Local Conda Environment (`apo_iii`)
 ```bash
-# Activar el ambiente de Conda apo_iii
+# Activate the existing apo_iii Conda environment
 conda activate apo_iii
 
-# Copiar y configurar variables de entorno
+# Set up environment variables
 cp .env.example .env
-# Editar .env con sus claves (OpenRouter, Gemini, LangSmith)
+# Edit .env with your respective API keys
 
-# Iniciar Jupyter Notebook o JupyterLab
+# Launch JupyterLab or Jupyter Notebook
 jupyter lab reto3_topologia_multiagente_forense_legal.ipynb
 ```
 
 ---
 
-## 7. Estructura del Repositorio
+## 8. Repository Layout
 
 ```text
 multi-agent/
-├── README.md                                    # Documentacion integral del proyecto
-├── reto3_topologia_multiagente_forense_legal.ipynb # Cuaderno ejecutable con experimentos y graficos
-├── generate_notebook.py                         # Generador programatico del cuaderno
-├── PPT_Multiagente.pdf                          # Presentacion guia del marco teorico (Unidad III)
-├── arquitectura_multiagente.ipynb               # Cuaderno de clase (referencia AsyncOpenAI)
-├── arquitectura_multiagente_langgraph.ipynb     # Cuaderno de clase (referencia LangGraph)
-├── pyproject.toml                               # Dependencias del proyecto
-├── uv.lock                                      # Lockfile de dependencias
-├── .env.example                                 # Plantilla de variables de entorno y API keys
-└── .gitignore                                   # Filtros de versionamiento
+├── README.md                                       # Complete project documentation and report
+├── reto3_topologia_multiagente_forense_legal.ipynb    # Fully executed Jupyter notebook with English outputs and figures
+├── PPT_Multiagente.pdf                             # Theoretical reference slides (Unit III)
+├── arquitectura_multiagente.ipynb                  # AsyncOpenAI multi-agent classroom reference
+├── arquitectura_multiagente_langgraph.ipynb        # LangGraph multi-agent classroom reference
+├── pyproject.toml                                  # Python project definition and dependencies
+├── uv.lock                                         # UV dependency lockfile
+├── .env.example                                    # Environment variable template
+└── .gitignore                                      # Git versioning exclusion rules
 ```
 
 ---
 
-## 8. Licencia y Créditos
+## 9. License and Academic Credits
 
-Desarrollado para el curso de **Inteligencia Artificial 2026-2** de la **Universidad Icesi**, bajo la dirección del profesor José Armando Ordóñez.
+Developed for the **Artificial Intelligence (2026-2)** course at **Universidad Icesi**, instructed by Professor Jose Armando Ordonez.
